@@ -1,0 +1,162 @@
+package operatingsystems;
+
+/*
+Description: The MEMORY subsystem is the main memory that consists of 4096 words (locations 0 to 4095)
+A word is the basic addressing unit. Each word is 12 bits long. The Memory subsystem imports memory from the LOADER
+through buffer and send or receive the data from CPU subsystem.
+ */
+
+import java.io.*;
+import java.lang.*;
+import java.math.*;
+import java.io.BufferedReader;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
+import java.io.IOException;
+
+
+
+//Main Memory Class
+public class MEMORY extends SYSTEM 
+{
+	public static String Z;
+	//MEMORY Constructor
+	MEMORY()
+	{
+		
+	}
+	//Main Memory with size 256 words
+	public static String[] MEM = new String[256];
+	
+	
+	//A Memory Buffer of Size 4
+	public static String[] Buffer = new String[4];
+	public static int BIN_INDEX =0;
+	public static int REDUCED_BIN_INDEX =0;
+	public static int MEM_INDEX =0;
+	public static int REDUCED_MEM_INDEX =0;
+
+	//method to calculate the gcd of two numbers
+	public static int gcd(int p, int q) {
+	    if (q == 0) return p;
+	    else return gcd(q, p % q);
+	}
+	//method to calculate the ratio of two numbers
+	static void ratio_words(int a, int b) {
+		   final int gcd = gcd(a,b);
+		   
+		   Memory_Numerator = a/gcd;
+		   Memory_Denominator = b/gcd;
+		}
+	static void ratio_frames(int a, int b) {
+		   final int gcd = gcd(a,b);
+		   
+		   Memory_Frames_Used = a/gcd;
+		   Memory_Frames_Available = b/gcd;
+		}
+	//Method to find out the Utilization of Memory in the System 
+	public static void MemoryUtilization()
+	{
+		int word_count =0;
+		for(int i=0;i<INPUT_SPOOLING.Program_Segment_Length;i++)
+		{
+			if(LOADER.pcb.smt[0].pmt.get(i).frame_no!=-1)
+			{
+				int frame_no = LOADER.pcb.smt[0].pmt.get(i).frame_no;
+				int frame_index = frame_no *8;
+				for(int j=0;j<8;j++)
+				{
+					if(MEM[frame_index] != null)
+					{
+						word_count++;
+					}
+					frame_index++;
+				}
+			}
+		}
+		if(LOADER.pcb.smt[1].pmt.get(0).frame_no!=-1)
+		{
+			int frame_no = LOADER.pcb.smt[1].pmt.get(0).frame_no;
+			int frame_index = frame_no *8;
+			for(int j=0;j<8;j++)
+			{
+				if(MEM[frame_index] != null)
+				{
+					word_count++;
+				}
+				frame_index++;
+		}
+		}
+		if(LOADER.pcb.smt[2].pmt.get(0).frame_no!=-1)
+		{
+			int frame_no = LOADER.pcb.smt[2].pmt.get(0).frame_no;
+			int frame_index = frame_no *8;
+			for(int j=0;j<8;j++)
+			{
+				if(MEM[frame_index] != null)
+				{
+					word_count++;
+				}
+				frame_index++;
+		}
+		}
+		Memory_Fragmentation = (48 - word_count);
+		ratio_words(word_count,256);
+		ratio_frames(6,32);
+	}
+	
+}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+
+
+
+

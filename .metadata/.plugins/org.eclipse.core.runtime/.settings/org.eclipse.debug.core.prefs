@@ -1,0 +1,3 @@
+eclipse.preferences.version=1
+org.eclipse.debug.core.USE_STEP_FILTERS=true
+prefWatchExpressions=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?>\n<watchExpressions>\n<expression enabled\="true" text\="page_number"/>\n<expression enabled\="true" text\="fmbv_replaced_index"/>\n<expression enabled\="true" text\="i"/>\n<expression enabled\="true" text\="temporary_page_index "/>\n<expression enabled\="true" text\="LOADER.pcb"/>\n<expression enabled\="true" text\="X "/>\n</watchExpressions>\n

@@ -1,0 +1,217 @@
+package operatingsystems;
+
+/*
+Description: The MEMORY subsystem is the main memory that consists of 4096 words (locations 0 to 4095)
+A word is the basic addressing unit. Each word is 12 bits long. The Memory subsystem imports memory from the LOADER
+through buffer and send or receive the data from CPU subsystem.
+ */
+
+import java.io.*;
+import java.lang.*;
+import java.math.*;
+import java.io.BufferedReader;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
+import java.io.IOException;
+
+
+
+//Main Memory Class
+public class MEMORY extends SYSTEM 
+{
+	public static String Z;
+	//MEMORY Constructor
+	MEMORY()
+	{
+		
+	}
+	//Main Memory with size 256 words
+	public static String[] MEM = new String[256];
+	
+	
+	//A Memory Buffer of Size 4
+	public static String[] Buffer = new String[4];
+	public static int BIN_INDEX =0;
+	public static int REDUCED_BIN_INDEX =0;
+	public static int MEM_INDEX =0;
+	public static int REDUCED_MEM_INDEX =0;
+
+	
+	public static int gcd(int p, int q) {
+	    if (q == 0) return p;
+	    else return gcd(q, p % q);
+	}
+	
+	static void ratio(int a, int b) {
+		   final int gcd = gcd(a,b);
+		    System.out.println(a/gcd + ":" + b/gcd);
+		}
+	
+	public static void MemoryUtilization()
+	{
+		int word_count =0;
+		for(int i=0;i<INPUT_SPOOLING.Program_Segment_Length;i++)
+		{
+			if(LOADER.pcb.smt[0].pmt.get(i).frame_no!=-1)
+			{
+				int frame_no = LOADER.pcb.smt[0].pmt.get(i).frame_no;
+				int frame_index = frame_no *8;
+				for(int j=0;j<8;j++)
+				{
+					if(MEM[frame_index] != null)
+					{
+						word_count++;
+					}
+					frame_index++;
+				}
+			}
+		}
+		if(LOADER.pcb.smt[1].pmt.get(0).frame_no!=-1)
+		{
+			int frame_no = LOADER.pcb.smt[1].pmt.get(0).frame_no;
+			int frame_index = frame_no *8;
+			for(int j=0;j<8;j++)
+			{
+				if(MEM[frame_index] != null)
+				{
+					word_count++;
+				}
+				frame_index++;
+		}
+		}
+		if(LOADER.pcb.smt[2].pmt.get(0).frame_no!=-1)
+		{
+			int frame_no = LOADER.pcb.smt[2].pmt.get(0).frame_no;
+			int frame_index = frame_no *8;
+			for(int j=0;j<8;j++)
+			{
+				if(MEM[frame_index] != null)
+				{
+					word_count++;
+				}
+				frame_index++;
+		}
+		}
+		
+		
+		
+		System.out.println("Total no of words:"+word_count);
+		
+		ratio(word_count,256);
+		
+	}
+	
+}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/*
+	//Load the elements from loader into the buffer
+	public void Buffer_Loading(int bin_index,int mem_index)
+	{
+		try
+		{
+	for(int i=0;i<4;i++)
+	{
+		Buffer[i] = LOADER.BIN.get(BIN_INDEX);
+		BIN_INDEX++;
+	}
+	
+	
+	
+	for(int i=0;i<4;i++)
+	{
+	MEM[MEM_INDEX] = Buffer[i];
+	MEM_INDEX++;
+	}
+	
+	
+	if(BIN_INDEX<LOADER.BIN.size())
+	 {
+		 Buffer_Loading(BIN_INDEX,MEM_INDEX);
+		 
+	 }
+		}
+		catch(IndexOutOfBoundsException ex)
+        {
+        	
+        }
+
+	}
+	//MEMORY method to read write and update the values from and into memory
+	public static String MEMORY(String X,int Y,String Z)
+	{
+		if(X.equals("READ"))
+		{
+			Z = MEMORY.MEM[Y];
+			
+		}
+		
+		else if(X.equals("WRITE"))
+		{
+			
+			
+		}
+		return Z;
+	}
+	
+	//Print the values of the memory
+	public void Memory_print()
+	{
+		for(int i=0;i<LOADER.BIN.size();i++)
+		{
+			System.out.println(LOADER.HD.get(i));
+			System.out.println(MEM[i]);
+		}
+	}	
+	*/
+
+
+
+
+

@@ -1,0 +1,15 @@
+Program Map table
+PageNo:0  FrameNo:5
+
+Input Segment Map table
+PageNo:3  FrameNo:8
+
+
+Program Map table
+PageNo:0  FrameNo:5
+PageNo:2  FrameNo:10
+
+Input Segment Map table
+PageNo:3  FrameNo:8
+
+

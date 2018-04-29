@@ -22,6 +22,9 @@ public class LOADER extends SYSTEM {
 	public static int Page_Fault_Clock = 0;
 	public static int Segment_Fault_Clock = 0;
 	public static String Temporary[] = new String[8];
+	public static ArrayList<String>Inputs = new ArrayList();
+	public static int Input_word_count=0;
+	public static boolean Input_flag = false;
 
 	// ArrayList to see all the pages in the memory
 	static ArrayList<Integer> pagesInMemory = new ArrayList();
@@ -71,6 +74,10 @@ public class LOADER extends SYSTEM {
 	// Loading the Page that contains the Input value in the Disk
 	public static String Input_Loading() {
 		Page_Faults++;
+		String input_value= null;
+		if(Input_flag==false)
+		{
+		Input_flag = true;
 		Segment_Fault_Clock = Segment_Fault_Clock + 5;
 		int input_page_Index = INPUT_SPOOLING.Input_Start_Index;
 		int pageNumber1 = input_page_Index / 8;
@@ -78,10 +85,13 @@ public class LOADER extends SYSTEM {
 		int input_frame_index = frame_Number * 8;
 		for (int i = 0; i < 8; i++) {
 			MEMORY.MEM[input_frame_index] = DISK.DISK[input_page_Index];
+			Inputs.add(MEMORY.MEM[input_frame_index]);
 			input_frame_index++;
 			input_page_Index++;
 		}
-		String input_value = MEMORY.MEM[frame_Number * 8];
+		//String input_value = MEMORY.MEM[frame_Number * 8];
+		input_value = Inputs.get(0);
+		Inputs.remove(0);
 		FMBV.FMBV[frame_Number - 1] = false;
 		LOADER.pcb.smt[1] = new SMT();
 		LOADER.pcb.smt[1].pmt.add(new PMT(1, -1, 0, 0, 0));
@@ -95,8 +105,14 @@ public class LOADER extends SYSTEM {
 		pagesInMemory.add(pageNumber1);
 
 		PCB.FreeFrames.remove(0);
-
+		}
+		else if(Input_flag == true)
+		{
+			input_value = Inputs.get(0);
+			Inputs.remove(0);
+		}
 		return input_value;
+		
 	}
 
 	// Method to calculate the new effective Address
@@ -302,6 +318,105 @@ public class LOADER extends SYSTEM {
 			for (int j = 0; j < pagesInMemory.size(); j++)
 
 			{
+				
+				
+				int no_of_pages = pagesInMemory.get(j);
+				
+				
+				
+				if (no_of_pages > (INPUT_SPOOLING.Program_Segment_Length-1))
+				
+				
+					
+				
+				{
+					
+					
+					
+					//if (LOADER.pcb.smt[1].pmt.get(pagesInMemory.get(j)-INPUT_SPOOLING.Program_Segment_Length).ref_bit == 0)
+
+					{
+						// get frame number of first page of pages of memory
+						
+						System.out.println((pagesInMemory.get(j))-INPUT_SPOOLING.Program_Segment_Length);
+						
+						System.out.println(LOADER.pcb.smt[1].pmt.get(0).frame_no);
+						int tempa= (pagesInMemory.get(j))-INPUT_SPOOLING.Program_Segment_Length;
+						
+						System.out.println(tempa);
+						
+						
+						int frame_value = LOADER.pcb.smt[1].pmt.get(tempa).frame_no;
+						// assign the frame number to PC_Page number
+						
+						int index;
+						
+						if (PC_Page_Number>INPUT_SPOOLING.Program_Segment_Length-1)
+							
+						{
+							index= 1;
+							
+						}
+						
+						else {
+							
+							index=0;
+						}
+						
+						
+     				LOADER.pcb.smt[index].pmt.get(PC_Page_Number).frame_no = frame_value;
+						LOADER.pcb.smt[1].pmt.get(pagesInMemory.get(j)-INPUT_SPOOLING.Program_Segment_Length).frame_no = -1;
+						pagesInMemory.remove(j);
+						pagesInMemory.add(PC_Page_Number);
+
+						// copy to disk
+
+						int diskAddress1;
+						int memoryAddress2;
+
+						diskAddress1 = pagesInMemory.get(j) * 8;
+						memoryAddress2 = frame_value * 8;
+
+						for (int i = 0; i < 8; i++) {
+							DISK.DISK[diskAddress1] = MEMORY.MEM[memoryAddress2];
+							memoryAddress2++;
+							diskAddress1++;
+						}
+						memoryAddress = frame_value * 8;
+						diskAddress = PC_Page_Number * 8;
+
+						// copy to memory
+						for (int i = 0; i < 8; i++) {
+							MEMORY.MEM[memoryAddress] = DISK.DISK[diskAddress];
+							memoryAddress++;
+							diskAddress++;
+						}
+
+						EA_Frame_Number = frame_value;
+
+						j = pagesInMemory.size();
+					}
+					
+
+					
+					
+					
+					
+				
+			
+				
+				}
+				
+				
+				
+				
+				
+				
+				else
+				
+				
+				{	
+				//program segment replacement
 				if (LOADER.pcb.smt[0].pmt.get(pagesInMemory.get(j)).ref_bit == 0)
 
 				{
@@ -340,6 +455,13 @@ public class LOADER extends SYSTEM {
 
 					j = pagesInMemory.size();
 				}
+				
+				
+				
+			}
+				
+				
+				
 			}
 		}
 

@@ -24,6 +24,7 @@ public class INPUT_SPOOLING extends SYSTEM {
 	public static int Output_Start_Index;
 	public static int Total_Pages;
 	public static int line_count = 0;
+	public static int calculated_program_length=0;
 
 	// Method to open the File from the File System
 	public void openFile() {
@@ -51,6 +52,10 @@ public class INPUT_SPOOLING extends SYSTEM {
 			each_line = readLines.nextLine();
 			if (each_line.contains("**INPUT")) {
 				input_count++;
+				if(Program_length!=(calculated_program_length/4))
+				{
+					ERROR_HANDLER.ERROR(105);
+				}
 			}
 			if (input_count > 1) {
 				ERROR_HANDLER.ERROR(11);
@@ -142,7 +147,7 @@ public class INPUT_SPOOLING extends SYSTEM {
 			if (linecount != 1 && linecount != 2 && input_flag != true) {
 				line_count++;
 				int word_count = 0;
-
+				calculated_program_length = calculated_program_length + each_line.length();
 				while (word_count < each_line.length()) {
 					if (each_line.length() > 16) {
 						ERROR_HANDLER.ERROR(10);
@@ -168,6 +173,56 @@ public class INPUT_SPOOLING extends SYSTEM {
 
 			// Reading the Input Value through the file
 			if (input_line_no == linecount) {
+				if(Input_Words >1)
+				{
+					System.out.println("Input words > 1");
+					String Input_line = each_line;
+					int first_input_line_count =0;
+					if(Program_length % 4==0)
+					{
+						disk_index = Program_length + (Program_length % 8);
+					}
+					else if(Program_length % 4 != 0)
+					{
+						disk_index = Program_length + (((Program_length/8)+1)*8 - Program_length);
+					}
+					while(first_input_line_count<Input_line.length())
+					{
+						String each_input_word = Input_line.substring(first_input_line_count, Math.min(first_input_line_count+4, Input_line.length()));
+						first_input_line_count = first_input_line_count +4;
+						String first_word = Hex_to_Bin_8_bit(each_input_word.substring(0, 2));
+						String second_word = Hex_to_Bin_8_bit(each_input_word.substring(2, 4));
+						String combined_binary_word = first_word + second_word;
+						DISK.DISK[disk_index] = combined_binary_word;
+						disk_index++;
+						System.out.println(Input_line);
+					}
+					while(readLines.hasNext())
+					{   int word_count = 0;
+						Input_line = readLines.nextLine();
+						if(!Input_line.equals("**FIN"))
+						{
+						while(word_count<Input_line.length())
+						{
+							String each_input_word = Input_line.substring(word_count, Math.min(word_count+4, Input_line.length()));
+							word_count = word_count +4;
+							String first_word = Hex_to_Bin_8_bit(each_input_word.substring(0, 2));
+							String second_word = Hex_to_Bin_8_bit(each_input_word.substring(2, 4));
+							String combined_binary_word = first_word + second_word;
+							DISK.DISK[disk_index] = combined_binary_word;
+							disk_index++;
+							System.out.println(Input_line);
+						}
+						}
+						else if(Input_line.equals("**FIN"))
+						{
+							fin_count++;
+						}
+					}
+					
+				}
+				else if(Input_Words==1)
+				{
 				String inputline = each_line;
 				if (inputline.length() != Input_Words * 4) {
 					ERROR_HANDLER.ERROR(17);
@@ -175,17 +230,21 @@ public class INPUT_SPOOLING extends SYSTEM {
 				String first_word = Hex_to_Bin_8_bit(inputline.substring(0, 2));
 				String second_word = Hex_to_Bin_8_bit(inputline.substring(2, 4));
 				String combined_binary_word = first_word + second_word;
-				disk_index = Program_length + (Program_length % 8);
+				if(Program_length % 4==0)
+				{
+					disk_index = Program_length + (Program_length % 8);
+				}
+				else if(Program_length % 4 != 0)
+				{
+					disk_index = Program_length + (((Program_length/8)+1)*8 - Program_length);
+				}
+				//disk_index = Program_length + (Program_length % 8);
 				DISK.DISK[disk_index] = combined_binary_word;
+				}
 			}
 
 		}
-
-		if (Program_length != line_count * 4) {
-			ERROR_HANDLER.ERROR(105);
-
-		}
-
+      
 		if (input_flag == false) {
 			ERROR_HANDLER.ERROR(13);
 		}

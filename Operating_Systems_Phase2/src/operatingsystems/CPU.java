@@ -172,48 +172,46 @@ public class CPU extends SYSTEM {
 				if(first_half.equals("00010011") && second_half.equals("00010011"))
 				{
 					
-					System_Clock = System_Clock +17;
-					IO_Clock = IO_Clock+15;
-					
-					Scanner scanner = new Scanner(System.in); 
-					//Takes the input from the Keyboard
-					Input = scanner.nextLine();
-					//Checks whether the Input is an integer or not
-					if(!Input.matches("(-?[0-9]+)"))
-					{
+					input_read_count++;
+					if (input_read_count > INPUT_SPOOLING.Input_Words) {
+						ERROR_HANDLER.ERROR(18);
+					}
+					System_Clock = System_Clock + 17;
+					IO_Clock = IO_Clock + 15;
+					VtuClock = VtuClock + 17;
+					Input = LOADER.Input_Loading();
+					Input_Segment_Words.add(Input);
+					// Checks whether the Input is an integer or not
+					if (!Input.matches("(-?[0-9]+)")) {
 						ERROR_HANDLER.ERROR(3);
 					}
-					int Input_Dec = Integer.parseInt(Input);
-					//Checks whether the input is within the range or not
-					if(Input_Dec<(-8192)||Input_Dec>(8192))
-					{
-						ERROR_HANDLER.ERROR(4);
-					}
-					String Bin_Input = Dec_to_Bin_16_bit(Input_Dec);
-					TOS = TOS+1;
+					String Bin_Input = Input;
+					TOS = TOS + 1;
 					Stack[TOS] = Bin_Input;
-					Input = scanner.nextLine();
-					//Checks whether the Input is an integer or not
-					if(!Input.matches("(-?[0-9]+)"))
-					{
+					input_read_count++;
+					if (input_read_count > INPUT_SPOOLING.Input_Words) {
+						ERROR_HANDLER.ERROR(18);
+					}
+					System_Clock = System_Clock + 17;
+					IO_Clock = IO_Clock + 15;
+					VtuClock = VtuClock + 17;
+					Input = LOADER.Input_Loading();
+					Input_Segment_Words.add(Input);
+					// Checks whether the Input is an integer or not
+					if (!Input.matches("(-?[0-9]+)")) {
 						ERROR_HANDLER.ERROR(3);
 					}
-					Input_Dec = Integer.parseInt(Input);
-					//Checks whether the input is within the range or not
-					if(Input_Dec<(-8192)||Input_Dec>(8192))
-					{
-						ERROR_HANDLER.ERROR(4);
-					}
-					Bin_Input = Dec_to_Bin_16_bit(Input_Dec);
-					TOS = TOS+1;
+					Bin_Input = Input;
+					TOS = TOS + 1;
 					Stack[TOS] = Bin_Input;
-					
-					PC = PC+1;	
-					try{printtrace();}
-					catch(Exception e){
-						
+					PC = PC + 1;
+					try {
+						printtrace();
+					} catch (Exception e) {
+
 					}
-					CPU(PC,Trace_Flag);
+
+					CPU(PC, Trace_Flag);
 				}
 				//Return statement
 				if(first_half.equals("00010101") && second_half.equals("00000000"))
@@ -252,7 +250,22 @@ public class CPU extends SYSTEM {
 				}
 				
 				
-				
+				//SL operation
+				if(first_half.equals("00001010") && second_half.equals("00000001"))
+				{
+					String stack_top = Stack[TOS];
+					int stack_dec = Bin_to_Dec(stack_top);
+					int shiftleft_decimal = stack_dec<<1;
+					String shiftleft_bin = Dec_to_Bin_16_bit(shiftleft_decimal);
+					Stack[TOS] = shiftleft_bin;
+					
+					PC = PC +1;
+					try{printtrace();}
+					catch(Exception e){
+						
+					}
+					CPU(PC,Trace_Flag);
+				}
 				
 				
 				
@@ -524,6 +537,9 @@ public class CPU extends SYSTEM {
 
 		} catch (Exception e) {
 
+			
+			e.printStackTrace();
+			
 		}
 
 	}
@@ -745,13 +761,13 @@ public class CPU extends SYSTEM {
 
 	// method for Zero Address CPG
 	public static void ZERO_CPG() {
-		int dec_stack = twosComplement(Stack[TOS]);
+		int dec_stack = twosComplement(Stack[TOS-1]);
 
 		//int dec_EA = Bin_to_Dec(MEMORY.MEM[Effective_Address]);
 		int dec_EA = twosComplement(Stack[TOS]);
-		if (dec_stack > dec_EA) {
+		if (dec_EA > dec_stack) {
 			Stack[TOS + 1] = "0000000000000001";
-		} else if (dec_stack < dec_EA) {
+		} else if (dec_EA < dec_stack) {
 			Stack[TOS + 1] = "0000000000000000";
 		} else if (dec_stack == dec_EA) {
 			Stack[TOS + 1] = "0000000000000000";
@@ -769,11 +785,13 @@ public class CPU extends SYSTEM {
 
 	// method for Zero Address CPL
 	public static void ZERO_CPL() {
-		int dec_stack = twosComplement(Stack[TOS]);
-		int dec_EA = Bin_to_Dec(MEMORY.MEM[Effective_Address]);
-		if (dec_stack < dec_EA) {
+		int dec_stack = twosComplement(Stack[TOS-1]);
+
+		//int dec_EA = Bin_to_Dec(MEMORY.MEM[Effective_Address]);
+		int dec_EA = twosComplement(Stack[TOS]);
+		if (dec_EA < dec_stack) {
 			Stack[TOS + 1] = "0000000000000001";
-		} else if (dec_stack > dec_EA) {
+		} else if (dec_EA > dec_stack) {
 			Stack[TOS + 1] = "0000000000000000";
 		} else if (dec_stack == dec_EA) {
 			Stack[TOS + 1] = "0000000000000000";
@@ -858,7 +876,8 @@ public class CPU extends SYSTEM {
 	}
 
 	// Method for Zero Address Write operation
-	public static void ZERO_WR() {
+	public static void ZERO_WR() 
+	{
 		output_write_count++;
 		if (output_write_count > INPUT_SPOOLING.Output_Words) {
 			ERROR_HANDLER.ERROR(19);
@@ -868,6 +887,7 @@ public class CPU extends SYSTEM {
 		VtuClock = VtuClock + 17;
 		PC = PC + 1;
 		Output = Stack[TOS];
+		System.out.println(Output);
 		Output_Segment_Words.add(Output);
 		if (LOADER.pcb.smt[2].pmt.get(0).frame_no == -1) {
 			LOADER.Output_Segment_Fault(Output_Disk_Address, Output);
@@ -953,7 +973,7 @@ public class CPU extends SYSTEM {
 	// Method for One Address AND operation
 	public static void ONE_AND() {
 		int dec_Stack = Bin_to_Dec(Stack[TOS]);
-
+		Effective_Address_By_Frame = LOADER.New_Calculated_Address(Effective_Address);
 		int dec_EA = Bin_to_Dec(MEMORY.MEM[Effective_Address_By_Frame]);
 
 		int And_value = (dec_Stack & dec_EA);
@@ -1025,7 +1045,8 @@ public class CPU extends SYSTEM {
 	// Method for One Address SUB operation
 	public static void ONE_SUB() {
 		int Stack_dec = Bin_to_Dec(Stack[TOS]);
-		int EA_dec = Bin_to_Dec(MEMORY.MEM[Effective_Address]);
+		Effective_Address_By_Frame = LOADER.New_Calculated_Address(Effective_Address);
+		int EA_dec = Bin_to_Dec(MEMORY.MEM[Effective_Address_By_Frame]);
 		int Addition = Stack_dec - EA_dec;
 		String Addition_binary = Dec_to_Bin_16_bit(Addition);
 		Stack[TOS] = Addition_binary;
@@ -1041,7 +1062,8 @@ public class CPU extends SYSTEM {
 	// Method for One Address MUL operation
 	public static void ONE_MUL() {
 		int Stack_dec = Bin_to_Dec(Stack[TOS]);
-		int EA_dec = Bin_to_Dec(MEMORY.MEM[Effective_Address]);
+		Effective_Address_By_Frame = LOADER.New_Calculated_Address(Effective_Address);
+		int EA_dec = Bin_to_Dec(MEMORY.MEM[Effective_Address_By_Frame]);
 		int Addition = Stack_dec * EA_dec;
 		String Addition_binary = Dec_to_Bin_16_bit(Addition);
 		Stack[TOS] = Addition_binary;
@@ -1057,7 +1079,8 @@ public class CPU extends SYSTEM {
 	// Method for One Address DIV operation
 	public static void ONE_DIV() {
 		int Stack_dec = Bin_to_Dec(Stack[TOS]);
-		int EA_dec = Bin_to_Dec(MEMORY.MEM[Effective_Address]);
+		Effective_Address_By_Frame = LOADER.New_Calculated_Address(Effective_Address);
+		int EA_dec = Bin_to_Dec(MEMORY.MEM[Effective_Address_By_Frame]);
 		int Addition = Stack_dec / EA_dec;
 		String Addition_binary = Dec_to_Bin_16_bit(Addition);
 		Stack[TOS] = Addition_binary;
@@ -1073,7 +1096,8 @@ public class CPU extends SYSTEM {
 	// Method for One Address MOD operation
 	public static void ONE_MOD() {
 		int Stack_dec = Bin_to_Dec(Stack[TOS]);
-		int EA_dec = Bin_to_Dec(MEMORY.MEM[Effective_Address]);
+		Effective_Address_By_Frame = LOADER.New_Calculated_Address(Effective_Address);
+		int EA_dec = Bin_to_Dec(MEMORY.MEM[Effective_Address_By_Frame]);
 		int Addition = Stack_dec % EA_dec;
 		String Addition_binary = Dec_to_Bin_16_bit(Addition);
 		Stack[TOS] = Addition_binary;
@@ -1100,6 +1124,7 @@ public class CPU extends SYSTEM {
 	public static void ONE_CPG() {
 		int dec_stack = twosComplement(Stack[TOS]);
 		// int dec_EA = Bin_to_Dec(MEMORY.MEM[Effective_Address]);
+		Effective_Address_By_Frame = LOADER.New_Calculated_Address(Effective_Address);
 		int dec_EA = Bin_to_Dec(MEMORY.MEM[Effective_Address_By_Frame]);
 		if (dec_stack > dec_EA) {
 			Stack[TOS + 1] = "0000000000000001";
@@ -1143,6 +1168,25 @@ public class CPU extends SYSTEM {
 
 	// Method for One Address CPE operation
 	public static void ONE_CPE() {
+		
+		int dec_stack = twosComplement(Stack[TOS]);	
+		Effective_Address_By_Frame = LOADER.New_Calculated_Address(Effective_Address);
+		int dec_EA = Bin_to_Dec(MEMORY.MEM[Effective_Address_By_Frame]);
+		if(dec_stack == dec_EA)
+		{
+			Stack[TOS+1] = "0000000000000001";
+		}
+		else if(dec_stack != dec_EA)
+		{
+			Stack[TOS+1] = "0000000000000000";
+		}
+		TOS = TOS+1;
+		PC = PC+1;
+		try{printtrace();}
+		catch(Exception e){
+			
+		}
+		CPU(PC,Trace_Flag);	
 
 	}
 
